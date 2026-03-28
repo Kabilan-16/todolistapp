@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: todo-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: todoapp
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: todopassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - todo-network
+
+  backend:
+    build: ./backend
+    container_name: todo-backend
+    ports: 
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql://todo_user:todopassword@mysql:3306/todoapp
+    depends_on:
+      - mysql
+    networks:
+      - todo-network    
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: todo-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - todo-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mysql-data:
+
+networks:
+  todo-network:
+    driver: bridge          
+
+
+
+
